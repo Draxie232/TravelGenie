@@ -23,9 +23,9 @@
                 title: "TravelGenie",
                 subtitle: "Your Personal AI Travel Planner",
                 destination: "Destination",
-                destinationPlaceholder: "e.g., Paris, France",
-                budget: "Budget (USD)",
-                budgetPlaceholder: "e.g., 1500",
+                destinationPlaceholder: "e.g., Agra, India",
+                budget: "Budget (INR)",
+                budgetPlaceholder: "e.g., 50000",
                 travelers: "Travelers",
                 travelersPlaceholder: "e.g., 2",
                 startDate: "Start Date",
@@ -43,76 +43,18 @@
                 modalClose: "Close",
                 packingModalTitle: "Smart Packing List",
                 saveSuccess: "Itinerary saved successfully!",
-                systemPrompt: "You are TravelGenie, a world-class AI travel planner. Your task is to create a personalized, dynamic, and inspiring travel itinerary. The user will provide a destination, budget, number of travelers, and dates. You MUST respond in the language specified by the user's prompt. Use Google Search to find real-time information, weather forecasts for the dates, and interesting local events. Structure the response clearly. Include suggestions for activities, dining, and appropriate clothing based on the weather. Be creative and helpful.",
-                userQuery: (dest, budget, travelers, start, end, lang) => `Please create a detailed travel itinerary for ${travelers} person(s) visiting ${dest} from ${start} to ${end}. Our total budget is approximately $${budget} USD. Please include suggestions for activities, food, and what to pack based on the weather. IMPORTANT: Respond ENTIRELY in ${lang}.`,
-                packingSystemPrompt: "You are an expert travel assistant. Based on the provided itinerary and context (destination, dates, weather), generate a concise and helpful packing list. Categorize items (e.g., Clothing, Essentials, Electronics) and be specific. Respond in the language of the user's request.",
+                systemPrompt: "You are TravelGenie, a world-class AI travel planner. Your task is to create a personalized, dynamic, and inspiring travel itinerary. The user will provide a destination, budget, number of travelers, and dates. You MUST respond in the language specified by the user's prompt. Use Google Search to find real-time information, weather forecasts for the dates, and interesting local events. Structure the response clearly. Include suggestions for activities, dining, and appropriate clothing based on the weather. Be creative and helpful. IMPORTANT: The user's budget is in Indian Rupees (INR). All monetary values you mention (e.g., costs, budget summaries) MUST be expressed in INR (₹). Do NOT use USD or any other currency.",
+                userQuery: (dest, budget, travelers, start, end, lang) => `Please create a detailed travel itinerary for ${travelers} person(s) visiting ${dest} from ${start} to ${end}. Our total budget is approximately ₹${budget} INR. Please include suggestions for activities, food, and what to pack based on the weather. IMPORTANT: Respond ENTIRELY in ${lang}.`,
+                packingSystemPrompt: "You are an expert travel assistant. Based on the provided itinerary and context (destination, dates, weather), generate a concise and helpful packing list. Categorize items (e.g., Clothing, Essentials, Electronics) and be specific. Respond in the language of the user's request. Assume all budget context is in INR (₹).",
                 packingUserQuery: (itinerary, dest, start, end, lang) => `Based on this itinerary for ${dest} from ${start} to ${end}, please generate a smart packing list. Respond ENTIRELY in ${lang}. \n\nITINERARY:\n${itinerary}`
-            }, // <-- This comma is after the 'hi' object
-            'kn': { // KANNADA
-                title: "TravelGenie",
-                subtitle: "ನಿಮ್ಮ ವೈಯಕ್ತಿಕ AI ಪ್ರಯಾಣ ಯೋಜಕ",
-                destination: "ಗಮ್ಯಸ್ಥಾನ",
-                destinationPlaceholder: "ಉದಾ, ಪ್ಯಾರಿಸ್, ಫ್ರಾನ್ಸ್",
-                budget: "ಬಜೆಟ್ (USD)",
-                budgetPlaceholder: "ಉದಾ, 1500",
-                travelers: "ಪ್ರಯಾಣಿಕರು",
-                travelersPlaceholder: "ಉದಾ, 2",
-                startDate: "ಪ್ರಾರಂಭ ದಿನಾಂಕ",
-                endDate: "ಅಂತಿಮ ದಿನಾಂಕ",
-                generateButton: "ಪ್ರಯಾಣ ವಿವರ ರಚಿಸಿ",
-                generatingButton: "ರಚಿಸಲಾಗುತ್ತಿದೆ...",
-                saveButton: "ಈ ಪ್ರಯಾಣ ವಿವರವನ್ನು ಉಳಿಸಿ",
-                smartPackingButton: "✨ ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿ",
-                generatingPackingList: "ರಚಿಸಲಾಗುತ್ತಿದೆ...",
-                generatedItineraryTitle: "ನಿಮ್ಮ AI-ರಚಿತ ಪ್ರಯಾಣ ವಿವರ",
-                savedItinerariesTitle: "ನಿಮ್ಮ ಉಳಿಸಿದ ಪ್ರಯಾಣ ವಿವರಗಳು",
-                deleteButton: "ಅಳಿಸಿ",
-                modalTitle: "ದೋಷ",
-                modalBody: "ಒಂದು ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
-                modalClose: "ಮುಚ್ಚಿ",
-                packingModalTitle: "ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿ",
-                saveSuccess: "ಪ್ರಯಾಣ ವಿವರವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ!",
-                systemPrompt: "ನೀವು TravelGenie, ವಿಶ್ವ ದರ್ಜೆಯ AI ಪ್ರಯಾಣ ಯೋಜಕ. ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ, ಕ್ರಿಯಾತ್ಮಕ ಮತ್ತು ಸ್ಪೂರ್ತಿದಾಯಕ ಪ್ರಯಾಣ ವಿವರವನ್ನು ರಚಿಸುವುದು ನಿಮ್ಮ ಕಾರ್ಯ. ಬಳಕೆದಾರರು ಗಮ್ಯಸ್ಥಾನ, ಬಜೆಟ್, ಪ್ರಯಾಣಿಕರ ಸಂಖ್ಯೆ ಮತ್ತು ದಿನಾಂಕಗಳನ್ನು ಒದಗಿಸುತ್ತಾರೆ. ಬಳಕೆದಾರರ ವಿನಂತಿಯಲ್ಲಿ ನಿರ್ದಿಷ್ಟಪಡಿಸಿದ ಭಾಷೆಯಲ್ಲಿ ನೀವು ಪ್ರತಿಕ್ರಿಯಿಸಬೇಕು. ನೈಜ-ಸಮಯದ ಮಾಹಿತಿ, ದಿನಾಂಕಗಳ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ ಮತ್ತು ಆಸಕ್ತಿದಾಯಕ ಸ್ಥಳೀಯ ಘಟನೆಗಳನ್ನು ಹುಡುಕಲು Google ಹುಡುಕಾಟವನ್ನು ಬಳಸಿ. ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ರಚಿಸಿ. ಹವಾಮಾನದ ಆಧಾರದ ಮೇಲೆ ಚಟುವಟಿಕೆಗಳು, ಊಟ ಮತ್ತು ಸೂಕ್ತವಾದ ಬಟ್ಟೆಗಳಿಗೆ ಸಲಹೆಗಳನ್ನು ಸೇರಿಸಿ. ಸೃಜನಶೀಲ ಮತ್ತು ಸಹಾಯಕವಾಗಿರಿ.",
-                userQuery: (dest, budget, travelers, start, end, lang) => `ದಯವಿಟ್ಟು ${travelers} ವ್ಯಕ್ತಿ(ಗಳಿಗೆ) ${dest} ಗೆ ${start} ರಿಂದ ${end} ವರೆಗೆ ಭೇಟಿ ನೀಡಲು ವಿವರವಾದ ಪ್ರಯಾಣ ಯೋಜನೆಯನ್ನು ರಚಿಸಿ. ನಮ್ಮ ಒಟ್ಟು ಬಜೆಟ್ ಸುಮಾರು ₹${budget} USD. ದಯವಿಟ್ಟು ಚಟುವಟಿಕೆಗಳು, ಆಹಾರ ಮತ್ತು ಹವಾಮಾನದ ಆಧಾರದ ಮೇಲೆ ಏನು ಪ್ಯಾಕ್ ಮಾಡಬೇಕು ಎಂಬುದರ ಕುರಿತು ಸಲಹೆಗಳನ್ನು ಸೇರಿಸಿ. ಪ್ರಮುಖ: ಸಂಪೂರ್ಣವಾಗಿ ${lang} ನಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ.`,
-                packingSystemPrompt: "ನೀವು ಒಬ್ಬ ತಜ್ಞ ಪ್ರಯಾಣ ಸಹಾಯಕ. ಒದಗಿಸಿದ ಪ್ರಯಾಣ ವಿವರ ಮತ್ತು ಸಂದರ್ಭ (ಗಮ್ಯಸ್ಥಾನ, ದಿನಾಂಕಗಳು, ಹವಾಮಾನ) ಆಧರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಉಪಯುಕ್ತ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಿ. ವಸ್ತುಗಳನ್ನು ವರ್ಗೀಕರಿಸಿ (ಉದಾ, ಬಟ್ಟೆ, ಅಗತ್ಯ ವಸ್ತುಗಳು, ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್) ಮತ್ತು ನಿರ್ದಿಷ್ಟವಾಗಿರಿ. ಬಳಕೆದಾರರ ವಿನಂತಿಯ ಭಾಷೆಯಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ.",
-                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} ಗೆ ${start} ರಿಂದ ${end} ವರೆಗಿನ ಈ ಪ್ರಯಾಣ ವಿವರವನ್ನು ಆಧರಿಸಿ, ದಯವಿಟ್ಟು ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಿ. ಸಂಪೂರ್ಣವಾಗಿ ${lang} ನಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ. \n\nಪ್ರಯಾಣ ವಿವರ:\n${itinerary}`
-            },
-            'pa': { // PUNJABI
-                title: "TravelGenie",
-                subtitle: "ਤੁਹਾਡਾ ਨਿੱਜੀ AI ਯਾਤਰਾ ਯੋਜਨਾਕਾਰ",
-                destination: "ਮੰਜ਼ਿਲ",
-                destinationPlaceholder: "ਜਿਵੇਂ, ਪੈਰਿਸ, ਫਰਾਂਸ",
-                budget: "ਬਜਟ (USD)",
-                budgetPlaceholder: "ਜਿਵੇਂ, 1500",
-                travelers: "ਯਾਤਰੀ",
-                travelersPlaceholder: "ਜਿਵੇਂ, 2",
-                startDate: "ਸ਼ੁਰੂਆਤੀ ਮਿਤੀ",
-                endDate: "ਅੰਤਿਮ ਮਿਤੀ",
-                generateButton: "ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਓ",
-                generatingButton: "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
-                saveButton: "ਇਸ ਯਾਤਰਾ ਯੋਜਨਾ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ",
-                smartPackingButton: "✨ ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ",
-                generatingPackingList: "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
-              _generatedItineraryTitle: "ਤੁਹਾਡੀ AI-ਦੁਆਰਾ ਬਣਾਈ ਯਾਤਰਾ ਯੋਜਨਾ",
-                savedItinerariesTitle: "ਤੁਹਾਡੀਆਂ ਸੁਰੱਖਿਅਤ ਕੀਤੀਆਂ ਯਾਤਰਾ ਯੋਜਨਾਵਾਂ",
-                deleteButton: "ਮਿਟਾਓ",
-                modalTitle: "ਗਲਤੀ",
-                modalBody: "ਇੱਕ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-                modalClose: "ਬੰਦ ਕਰੋ",
-                packingModalTitle: "ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ",
-                saveSuccess: "ਯਾਤਰਾ ਯੋਜਨਾ ਸਫਲਤਾਪੂਰਵਕ ਸੁਰੱਖਿਅਤ ਕੀਤੀ ਗਈ!",
-                systemPrompt: "ਤੁਸੀਂ TravelGenie ਹੋ, ਇੱਕ ਵਿਸ਼ਵ-ਪੱਧਰੀ AI ਯਾਤਰਾ ਯੋਜਨਾਕਾਰ। ਤੁਹਾਡਾ ਕੰਮ ਇੱਕ ਵਿਅਕਤੀਗਤ, ਗਤੀਸ਼ੀਲ, ਅਤੇ ਪ੍ਰੇਰਣਾਦਾਇਕ ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਉਣਾ ਹੈ। ਉਪਭੋਗਤਾ ਇੱਕ ਮੰਜ਼ਿਲ, ਬਜਟ, ਯਾਤਰੀਆਂ ਦੀ ਗਿਣਤੀ, ਅਤੇ ਤਾਰੀਖਾਂ ਪ੍ਰਦਾਨ ਕਰੇਗਾ। ਤੁਹਾਨੂੰ ਉਪਭੋਗਤਾ ਦੀ ਬੇਨਤੀ ਵਿੱਚ ਦੱਸੀ ਭਾਸ਼ਾ ਵਿੱਚ ਜਵਾਬ ਦੇਣਾ ਚਾਹੀਦਾ ਹੈ। ਰੀਅਲ-ਟਾਈਮ ਜਾਣਕਾਰੀ, ਤਾਰੀਖਾਂ ਲਈ ਮੌਸਮ ਦੀ ਭਵਿੱਖਬਾਣੀ, ਅਤੇ ਦਿਲਚਸਪ ਸਥਾਨਕ ਸਮਾਗਮਾਂ ਨੂੰ ਲੱਭਣ ਲਈ ਗੂਗਲ ਖੋਜ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਜਵਾਬ ਨੂੰ ਸਪਸ਼ਟ ਰੂਪ ਵਿੱਚ ਤਿਆਰ ਕਰੋ। ਮੌਸਮ ਦੇ ਅਧਾਰ 'ਤੇ ਗਤੀਵਿਧੀਆਂ, ਭੋਜਨ, ਅਤੇ ਢੁਕਵੇਂ ਕੱਪੜਿਆਂ ਲਈ ਸੁਝਾਅ ਸ਼ਾਮਲ ਕਰੋ। ਰਚਨਾਤਮਕ ਅਤੇ ਮਦਦਗਾਰ ਬਣੋ।",
-                userQuery: (dest, budget, travelers, start, end, lang) => `ਕਿਰਪਾ ਕਰਕੇ ${travelers} ਵਿਅਕਤੀ(ਆਂ) ਲਈ ${dest} ਦੀ ਯਾਤਰਾ ਲਈ ${start} ਤੋਂ ${end} ਤੱਕ ਇੱਕ ਵਿਸਤ੍ਰਿਤ ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਓ। ਸਾਡਾ ਕੁੱਲ ਬਜਟ ਲਗਭਗ ₹${budget} USD ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਮੌਸਮ ਦੇ ਅਧਾਰ 'ਤੇ ਗਤੀਵਿਧੀਆਂ, ਭੋਜਨ, ਅਤੇ ਕੀ ਪੈਕ ਕਰਨਾ ਹੈ, ਇਸ ਬਾਰੇ ਸੁਝਾਅ ਸ਼ਾਮਲ ਕਰੋ। ਮਹੱਤਵਪੂਰਨ: ਪੂਰੀ ਤਰ੍ਹਾਂ ${lang} ਵਿੱਚ ਜਵਾਬ ਦਿਓ।`,
-                packingSystemPrompt: "ਤੁਸੀਂ ਇੱਕ ਮਾਹਰ ਯਾਤਰਾ ਸਹਾਇਕ ਹੋ। ਪ੍ਰਦਾਨ ਕੀਤੀ ਯਾਤਰਾ ਯੋਜਨਾ ਅਤੇ ਸੰਦਰਭ (ਮੰਜ਼ਿਲ, ਤਾਰੀਖਾਂ, ਮੌਸਮ) ਦੇ ਅਧਾਰ 'ਤੇ, ਇੱਕ ਸੰਖੇਪ ਅਤੇ ਮਦਦਗਾਰ ਪੈਕਿੰਗ ਸੂਚੀ ਤਿਆਰ ਕਰੋ। ਆਈਟਮਾਂ ਨੂੰ ਸ਼੍ਰੇਣੀਬੱਧ ਕਰੋ (ਜਿਵੇਂ, ਕੱਪੜੇ, ਜ਼ਰੂਰੀ ਚੀਜ਼ਾਂ, ਇਲੈਕਟ੍ਰਾਨਿਕਸ) ਅਤੇ ਖਾਸ ਬਣੋ। ਉਪਭੋਗਤਾ ਦੀ ਬੇਨਤੀ ਦੀ ਭਾਸ਼ਾ ਵਿੱਚ ਜਵਾਬ ਦਿਓ।",
-                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} ਲਈ ${start} ਤੋਂ ${end} ਤੱਕ ਦੀ ਇਸ ਯਾਤਰਾ ਯੋਜਨਾ ਦੇ ਅਧਾਰ 'ਤੇ, ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ ਤਿਆਰ ਕਰੋ। ਪੂਰੀ ਤਰ੍ਹਾਂ ${lang} ਵਿੱਚ ਜਵਾਬ ਦਿਓ। \n\nਯਾਤਰਾ ਯੋਜਨਾ:\n${itinerary}`
-            },  
-            'hi': {
+            },
+            'hi': { // HINDI
                 title: "TravelGenie",
                 subtitle: "आपका व्यक्तिगत AI यात्रा योजनाकार",
                 destination: "गंतव्य",
-                destinationPlaceholder: "जैसे, पेरिस, फ्रांस",
-                budget: "बजट (Rs.)",
-                budgetPlaceholder: "जैसे, 1500",
+                destinationPlaceholder: "जैसे, आगरा, भारत",
+                budget: "बजट (INR)",
+                budgetPlaceholder: "जैसे, 50000",
                 travelers: "यात्री",
                 travelersPlaceholder: "जैसे, 2",
                 startDate: "आरंभ तिथि",
@@ -130,10 +72,68 @@
                 modalClose: "बंद करें",
                 packingModalTitle: "स्मार्ट पैकिंग सूची",
                 saveSuccess: "यात्रा कार्यक्रम सफलतापूर्वक सहेजा गया!",
-                systemPrompt: "आप TravelGenie हैं, एक विश्व स्तरीय AI यात्रा योजनाकार। आपका काम एक व्यक्तिगत, गतिशील और प्रेरणादायक यात्रा कार्यक्रम बनाना है। उपयोगकर्ता एक गंतव्य, बजट, यात्रियों की संख्या और तारीखें प्रदान करेगा। आपको उपयोगकर्ता के प्रॉम्प्ट में निर्दिष्ट भाषा में जवाब देना होगा। वास्तविक समय की जानकारी, तारीखों के लिए मौसम के पूर्वानुमान और दिलचस्प स्थानीय घटनाओं को खोजने के लिए Google खोज का उपयोग करें। प्रतिक्रिया को स्पष्ट रूप से संरचित करें। मौसम के आधार पर गतिविधियों, भोजन और उपयुक्त कपड़ों के लिए सुझाव शामिल करें। रचनात्मक और सहायक बनें।",
-                userQuery: (dest, budget, travelers, start, end, lang) => `कृपया ${travelers} व्यक्ति(यों) के लिए ${dest} की यात्रा के लिए ${start} से ${end} तक एक विस्तृत यात्रा कार्यक्रम बनाएं। हमारा कुल बजट लगभग ₹${budget} USD है। कृपया मौसम के आधार पर गतिविधियों, भोजन और क्या पैक करना है, इसके लिए सुझाव शामिल करें। महत्वपूर्ण: पूरी तरह से ${lang} में जवाब दें।`,
-                packingSystemPrompt: "आप एक विशेषज्ञ यात्रा सहायक हैं। प्रदान किए गए यात्रा कार्यक्रम और संदर्भ (गंतव्य, तिथियां, मौसम) के आधार पर, एक संक्षिप्त और उपयोगी पैकिंग सूची तैयार करें। वस्तुओं को वर्गीकृत करें (जैसे, कपड़े, आवश्यक वस्तुएं, इलेक्ट्रॉनिक्स) और विशिष्ट रहें। उपयोगकर्ता के अनुरोध की भाषा में जवाब दें।",
+                systemPrompt: "आप TravelGenie हैं, एक विश्व स्तरीय AI यात्रा योजनाकार। आपका काम एक व्यक्तिगत, गतिशील और प्रेरणादायक यात्रा कार्यक्रम बनाना है। उपयोगकर्ता एक गंतव्य, बजट, यात्रियों की संख्या और तारीखें प्रदान करेगा। आपको उपयोगकर्ता के प्रॉम्प्ट में निर्दिष्ट भाषा में जवाब देना होगा। वास्तविक समय की जानकारी, तारीखों के लिए मौसम के पूर्वानुमान और दिलचस्प स्थानीय घटनाओं को खोजने के लिए Google खोज का उपयोग करें। प्रतिक्रिया को स्पष्ट रूप से संरचित करें। मौसम के आधार पर गतिविधियों, भोजन और उपयुक्त कपड़ों के लिए सुझाव शामिल करें। रचनात्मक और सहायक बनें। महत्वपूर्ण: उपयोगकर्ता का बजट भारतीय रुपये (INR) में है। आपके द्वारा उल्लिखित सभी मौद्रिक मूल्य (जैसे, लागत, बजट सारांश) INR (₹) में व्यक्त किए जाने चाहिए। USD या किसी अन्य मुद्रा का प्रयोग न करें।",
+                userQuery: (dest, budget, travelers, start, end, lang) => `कृपया ${travelers} व्यक्ति(यों) के लिए ${dest} की यात्रा के लिए ${start} से ${end} तक एक विस्तृत यात्रा कार्यक्रम बनाएं। हमारा कुल बजट लगभग ₹${budget} INR है। कृपया मौसम के आधार पर गतिविधियों, भोजन और क्या पैक करना है, इसके लिए सुझाव शामिल करें। महत्वपूर्ण: पूरी तरह से ${lang} में जवाब दें।`,
+                packingSystemPrompt: "आप एक विशेषज्ञ यात्रा सहायक हैं। प्रदान किए गए यात्रा कार्यक्रम और संदर्भ (गंतव्य, तिथियां, मौसम) के आधार पर, एक संक्षिप्त और उपयोगी पैकिंग सूची तैयार करें। वस्तुओं को वर्गीकृत करें (जैसे, कपड़े, आवश्यक वस्तुएं, इलेक्ट्रॉनिक्स) और विशिष्ट रहें। उपयोगकर्ता के अनुरोध की भाषा में जवाब दें। मान लें कि सभी बजट संदर्भ INR (₹) में हैं।",
                 packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} के लिए ${start} से ${end} तक के इस यात्रा कार्यक्रम के आधार पर, कृपया एक स्मार्ट पैकिंग सूची तैयार करें। पूरी तरह से ${lang} में जवाब दें। \n\nयात्रा कार्यक्रम:\n${itinerary}`
+            },
+            'kn': { // KANNADA
+                title: "TravelGenie",
+                subtitle: "ನಿಮ್ಮ ವೈಯಕ್ತಿಕ AI ಪ್ರಯಾಣ ಯೋಜಕ",
+                destination: "ಗಮ್ಯಸ್ಥಾನ",
+                destinationPlaceholder: "ಉದಾ, ಆಗ್ರಾ, ಭಾರತ",
+                budget: "ಬಜೆಟ್ (INR)",
+                budgetPlaceholder: "ಉದಾ, 50000",
+                travelers: "ಪ್ರಯಾಣಿಕರು",
+                travelersPlaceholder: "ಉದಾ, 2",
+                startDate: "ಪ್ರಾರಂಭ ದಿನಾಂಕ",
+                endDate: "ಅಂತಿಮ ದಿನಾಂಕ",
+                generateButton: "ಪ್ರಯಾಣ ವಿವರ ರಚಿಸಿ",
+                generatingButton: "ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+                saveButton: "ಈ ಪ್ರಯಾಣ ವಿವರವನ್ನು ಉಳಿಸಿ",
+                smartPackingButton: "✨ ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿ",
+                generatingPackingList: "ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+                generatedItineraryTitle: "ನಿಮ್ಮ AI-ರಚಿತ ಪ್ರಯಾಣ ವಿವರ",
+                savedItinerariesTitle: "ನಿಮ್ಮ ಉಳಿಸಿದ ಪ್ರಯಾಣ ವಿವರಗಳು",
+                deleteButton: "ಅಳಿಸಿ",
+                modalTitle: "ದೋಷ",
+                modalBody: "ಒಂದು ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+                modalClose: "ಮುಚ್ಚಿ",
+                packingModalTitle: "ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿ",
+                saveSuccess: "ಪ್ರಯಾಣ ವಿವರವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ!",
+                systemPrompt: "ನೀವು TravelGenie, ವಿಶ್ವ ದರ್ಜೆಯ AI ಪ್ರಯಾಣ ಯೋಜಕ. ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ, ಕ್ರಿಯಾತ್ಮಕ ಮತ್ತು ಸ್ಪೂರ್ತಿದಾಯಕ ಪ್ರಯಾಣ ವಿವರವನ್ನು ರಚಿಸುವುದು ನಿಮ್ಮ ಕಾರ್ಯ. ಬಳಕೆದಾರರು ಗಮ್ಯಸ್ಥಾನ, ಬಜೆಟ್, ಪ್ರಯಾಣಿಕರ ಸಂಖ್ಯೆ ಮತ್ತು ದಿನಾಂಕಗಳನ್ನು ಒದಗಿಸುತ್ತಾರೆ. ಬಳಕೆದಾರರ ವಿನಂತಿಯಲ್ಲಿ ನಿರ್ದಿಷ್ಟಪಡಿಸಿದ ಭಾಷೆಯಲ್ಲಿ ನೀವು ಪ್ರತಿಕ್ರಿಯಿಸಬೇಕು. ನೈಜ-ಸಮಯದ ಮಾಹಿತಿ, ದಿನಾಂಕಗಳ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ ಮತ್ತು ಆಸಕ್ತಿದಾಯಕ ಸ್ಥಳೀಯ ಘಟನೆಗಳನ್ನು ಹುಡುಕಲು Google ಹುಡುಕಾಟವನ್ನು ಬಳಸಿ. ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ರಚಿಸಿ. ಹವಾಮಾನದ ಆಧಾರದ ಮೇಲೆ ಚಟುವಟಿಕೆಗಳು, ಊಟ ಮತ್ತು ಸೂಕ್ತವಾದ ಬಟ್ಟೆಗಳಿಗೆ ಸಲಹೆಗಳನ್ನು ಸೇರಿಸಿ. ಸೃಜನಶೀಲ ಮತ್ತು ಸಹಾಯಕವಾಗಿರಿ. ಪ್ರಮುಖ: ಬಳಕೆದಾರರ ಬಜೆಟ್ ಭಾರತೀಯ ರೂಪಾಯಿಗಳಲ್ಲಿದೆ (INR). ನೀವು ಉಲ್ಲೇಖಿಸುವ ಎಲ್ಲಾ ವಿತ್ತೀಯ ಮೌಲ್ಯಗಳನ್ನು (ಉದಾ, ವೆಚ್ಚಗಳು, ಬಜೆಟ್ ಸಾರಾಂಶಗಳು) INR (₹) ನಲ್ಲಿ ವ್ಯಕ್ತಪಡಿಸಬೇಕು. USD ಅಥವಾ ಯಾವುದೇ ಇತರ ಕರೆನ್ಸಿಯನ್ನು ಬಳಸಬೇಡಿ.",
+                userQuery: (dest, budget, travelers, start, end, lang) => `ದಯವಿಟ್ಟು ${travelers} ವ್ಯಕ್ತಿ(ಗಳಿಗೆ) ${dest} ಗೆ ${start} ರಿಂದ ${end} ವರೆಗೆ ಭೇಟಿ ನೀಡಲು ವಿವರವಾದ ಪ್ರಯಾಣ ಯೋಜನೆಯನ್ನು ರಚಿಸಿ. ನಮ್ಮ ಒಟ್ಟು ಬಜೆಟ್ ಸುಮಾರು ₹${budget} INR. ದಯವಿಟ್ಟು ಚಟುವಟಿಕೆಗಳು, ಆಹಾರ ಮತ್ತು ಹವಾಮಾನದ ಆಧಾರದ ಮೇಲೆ ಏನು ಪ್ಯಾಕ್ ಮಾಡಬೇಕು ಎಂಬುದರ ಕುರಿತು ಸಲಹೆಗಳನ್ನು ಸೇರಿಸಿ. ಪ್ರಮುಖ: ಸಂಪೂರ್ಣವಾಗಿ ${lang} ನಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ.`,
+                packingSystemPrompt: "ನೀವು ಒಬ್ಬ ತಜ್ಞ ಪ್ರಯಾಣ ಸಹಾಯಕ. ಒದಗಿಸಿದ ಪ್ರಯಾಣ ವಿವರ ಮತ್ತು ಸಂದರ್ಭ (ಗಮ್ಯಸ್ಥಾನ, ದಿನಾಂಕಗಳು, ಹವಾಮಾನ) ಆಧರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಉಪಯುಕ್ತ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಿ. ವಸ್ತುಗಳನ್ನು ವರ್ಗೀಕರಿಸಿ (ಉದಾ, ಬಟ್ಟೆ, ಅಗತ್ಯ ವಸ್ತುಗಳು, ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್) ಮತ್ತು ನಿರ್ದಿಷ್ಟವಾಗಿರಿ. ಬಳಕೆದಾರರ ವಿನಂತಿಯ ಭಾಷೆಯಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ. ಎಲ್ಲಾ ಬಜೆಟ್ ಸಂದರ್ಭವು INR (₹) ನಲ್ಲಿದೆ ಎಂದು ಭಾವಿಸಿ.",
+                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} ಗೆ ${start} ರಿಂದ ${end} ವರೆಗಿನ ಈ ಪ್ರಯಾಣ ವಿವರವನ್ನು ಆಧರಿಸಿ, ದಯವಿಟ್ಟು ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಿ. ಸಂಪೂರ್ಣವಾಗಿ ${lang} ನಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ. \n\nಪ್ರಯಾಣ ವಿವರ:\n${itinerary}`
+            },
+            'pa': { // PUNJABI
+                title: "TravelGenie",
+                subtitle: "ਤੁਹਾਡਾ ਨਿੱਜੀ AI ਯਾਤਰਾ ਯੋਜਨਾਕਾਰ",
+                destination: "ਮੰਜ਼ਿਲ",
+                destinationPlaceholder: "ਜਿਵੇਂ, ਆਗਰਾ, ਭਾਰਤ",
+                budget: "ਬਜਟ (INR)",
+                budgetPlaceholder: "ਜਿਵੇਂ, 50000",
+                travelers: "ਯਾਤਰੀ",
+                travelersPlaceholder: "ਜਿਵੇਂ, 2",
+                startDate: "ਸ਼ੁਰੂਆਤੀ ਮਿਤੀ",
+                endDate: "ਅੰਤਿਮ ਮਿਤੀ",
+                generateButton: "ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਓ",
+                generatingButton: "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
+                saveButton: "ਇਸ ਯਾਤਰਾ ਯੋਜਨਾ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ",
+                smartPackingButton: "✨ ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ",
+                generatingPackingList: "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
+                generatedItineraryTitle: "ਤੁਹਾਡੀ AI-ਦੁਆਰਾ ਬਣਾਈ ਯਾਤRAA ਯੋਜਨਾ",
+                savedItinerariesTitle: "ਤੁਹਾਡੀਆਂ ਸੁਰੱਖਿਅਤ ਕੀਤੀਆਂ ਯਾਤਰਾ ਯੋਜਨਾਵਾਂ",
+                deleteButton: "ਮਿਟਾਓ",
+                modalTitle: "ਗਲਤੀ",
+                modalBody: "ਇੱਕ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+                modalClose: "ਬੰਦ ਕਰੋ",
+                packingModalTitle: "ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ",
+                saveSuccess: "ਯਾਤਰਾ ਯੋਜਨਾ ਸਫਲਤਾਪੂਰਵਕ ਸੁਰੱਖਿਅਤ ਕੀਤੀ ਗਈ!",
+                systemPrompt: "ਤੁਸੀਂ TravelGenie ਹੋ, ਇੱਕ ਵਿਸ਼ਵ-ਪੱਧਰੀ AI ਯਾਤਰਾ ਯੋਜਨਾਕਾਰ। ਤੁਹਾਡਾ ਕੰਮ ਇੱਕ ਵਿਅਕਤੀਗਤ, ਗਤੀਸ਼ੀਲ, ਅਤੇ ਪ੍ਰੇਰਣਾਦਾਇਕ ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਉਣਾ ਹੈ। ਉਪਭੋਗਤਾ ਇੱਕ ਮੰਜ਼ਿਲ, ਬਜਟ, ਯਾਤਰੀਆਂ ਦੀ ਗਿਣਤੀ, ਅਤੇ ਤਾਰੀਖਾਂ ਪ੍ਰਦਾਨ ਕਰੇਗਾ। ਤੁਹਾਨੂੰ ਉਪਭੋਗਤਾ ਦੀ ਬੇਨਤੀ ਵਿੱਚ ਦੱਸੀ ਭਾਸ਼ਾ ਵਿੱਚ ਜਵਾਬ ਦੇਣਾ ਚਾਹੀਦਾ ਹੈ। ਰੀਅਲ-ਟਾਈਮ ਜਾਣਕਾਰੀ, ਤਾਰੀਖਾਂ ਲਈ ਮੌਸਮ ਦੀ ਭਵਿੱਖਬਾਣੀ, ਅਤੇ ਦਿਲਚਸਪ ਸਥਾਨਕ ਸਮਾਗਮਾਂ ਨੂੰ ਲੱਭਣ ਲਈ ਗੂਗਲ ਖੋਜ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਜਵਾਬ ਨੂੰ ਸਪਸ਼ਟ ਰੂਪ ਵਿੱਚ ਤਿਆਰ ਕਰੋ। ਮੌਸਮ ਦੇ ਅਧਾਰ 'ਤੇ ਗਤੀਵਿਧੀਆਂ, ਭੋਜਨ, ਅਤੇ ਢੁਕਵੇਂ ਕੱਪੜਿਆਂ ਲਈ ਸੁਝਾਅ ਸ਼ਾਮਲ ਕਰੋ। ਰਚਨਾਤਮਕ ਅਤੇ ਮਦਦਗਾਰ ਬਣੋ। ਮਹੱਤਵਪੂਰਨ: ਉਪਭੋਗਤਾ ਦਾ ਬਜਟ ਭਾਰਤੀ ਰੁਪਏ (INR) ਵਿੱਚ ਹੈ। ਤੁਹਾਡੇ ਦੁਆਰਾ ਦੱਸੇ ਗਏ ਸਾਰੇ ਮੁਦਰਾ ਮੁੱਲ (ਜਿਵੇਂ, ਲਾਗਤਾਂ, ਬਜਟ ਸਾਰਾਂਸ਼) INR (₹) ਵਿੱਚ ਪ੍ਰਗਟ ਕੀਤੇ ਜਾਣੇ ਚਾਹੀਦੇ ਹਨ। USD ਜਾਂ ਕੋਈ ਹੋਰ ਮੁਦਰਾ ਨਾ ਵਰਤੋ।",
+                userQuery: (dest, budget, travelers, start, end, lang) => `ਕਿਰਪਾ ਕਰਕੇ ${travelers} ਵਿਅਕਤੀ(ਆਂ) ਲਈ ${dest} ਦੀ ਯਾਤਰਾ ਲਈ ${start} ਤੋਂ ${end} ਤੱਕ ਇੱਕ ਵਿਸਤ੍ਰਿਤ ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਓ। ਸਾਡਾ ਕੁੱਲ ਬਜਟ ਲਗਭਗ ₹${budget} INR ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਮੌਸਮ ਦੇ ਅਧਾਰ 'ਤੇ ਗਤੀਵਿਧੀਆਂ, ਭੋਜਨ, ਅਤੇ ਕੀ ਪੈਕ ਕਰਨਾ ਹੈ, ਇਸ ਬਾਰੇ ਸੁਝਾਅ ਸ਼ਾਮਲ ਕਰੋ। ਮਹੱਤਵਪੂਰਨ: ਪੂਰੀ ਤਰ੍ਹਾਂ ${lang} ਵਿੱਚ ਜਵਾਬ ਦਿਓ।`,
+                packingSystemPrompt: "ਤੁਸੀਂ ਇੱਕ ਮਾਹਰ ਯਾਤਰਾ ਸਹਾਇਕ ਹੋ। ਪ੍ਰਦਾਨ ਕੀਤੀ ਯਾਤਰਾ ਯੋਜਨਾ ਅਤੇ ਸੰਦਰਭ (ਮੰਜ਼ਿਲ, ਤਾਰੀਖਾਂ, ਮੌਸਮ) ਦੇ ਅਧਾਰ 'ਤੇ, ਇੱਕ ਸੰਖੇਪ ਅਤੇ ਮਦਦਗਾਰ ਪੈਕਿੰਗ ਸੂਚੀ ਤਿਆਰ ਕਰੋ। ਆਈਟਮਾਂ ਨੂੰ ਸ਼੍ਰੇਣੀਬੱਧ ਕਰੋ (ਜਿਵੇਂ, ਕੱਪੜੇ, ਜ਼ਰੂਰੀ ਚੀਜ਼ਾਂ, ਇਲੈਕਟ੍ਰਾਨਿਕਸ) ਅਤੇ ਖਾਸ ਬਣੋ। ਉਪਭੋਗਤਾ ਦੀ ਬੇਨਤੀ ਦੀ ਭਾਸ਼ਾ ਵਿੱਚ ਜਵਾਬ ਦਿਓ। ਮੰਨ ਲਓ ਕਿ ਸਾਰੇ ਬਜਟ ਸੰਦਰਭ INR (₹) ਵਿੱਚ ਹਨ।",
+                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} ਲਈ ${start} ਤੋਂ ${end} ਤੱਕ ਦੀ ਇਸ ਯਾਤਰਾ ਯੋਜਨਾ ਦੇ ਅਧਾਰ 'ਤੇ, ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ ਤਿਆਰ ਕਰੋ। ਪੂਰੀ ਤਰ੍ਹਾਂ ${lang} ਵਿੱਚ ਜਵਾਬ ਦਿਓ। \n\nਯਾਤਰਾ ਯੋਜਨਾ:\n${itinerary}`
             }
         };
 
@@ -261,16 +261,27 @@
             document.getElementById('smartPackingButton').classList.add('hidden');
 
             const langNameMap = {
-                'en': 'English',
-                'hi': 'Hindi',
-                'kn': 'Kannada',
-                'pa': 'Punjabi'
-            };
-            const langName = langNameMap[currentLanguage] || 'English'; // Default to English
+                'en': 'English',
+                'hi': 'Hindi',
+                'kn': 'Kannada',
+                'pa': 'Punjabi'
+            };
+            const langName = langNameMap[currentLanguage] || 'English'; // Default to English
+            
             const systemPrompt = translations[currentLanguage].systemPrompt;
             const userQuery = translations[currentLanguage].userQuery(destination, budget, travelers, startDate, endDate, langName);
-            const apiKey = "AIzaSyD2eYvAt57FfFfMZ8iJyWRLtD4ObRSEE4s"; // Leave empty, will be handled by environment
+            
+            // ⚠️ IMPORTANT: You must add your Google Gemini API key here
+            const apiKey = ""; // <--- PASTE YOUR API KEY HERE
+            
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            if (apiKey === "") {
+                 console.error("API Key is missing. Please add your Gemini API Key.");
+                 showModal('errorModal', 'modalTitle', "API Key is missing. Please ask the developer to configure the app.");
+                 showLoading(false);
+                 return;
+            }
 
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
@@ -349,19 +360,31 @@
             packingBtn.disabled = true;
 
             const { destination, startDate, endDate } = generatedItineraryDetails;
+            
             const langNameMap = {
-                'en': 'English',
-                'hi': 'Hindi',
-                'kn': 'Kannada',
-                'pa': 'Punjabi'
-            };
-            const langName = langNameMap[currentLanguage] || 'English'; // Default to English
+                'en': 'English',
+                'hi': 'Hindi',
+                'kn': 'Kannada',
+                'pa': 'Punjabi'
+            };
+            const langName = langNameMap[currentLanguage] || 'English'; // Default to English
             
             const systemPrompt = translations[currentLanguage].packingSystemPrompt;
             const userQuery = translations[currentLanguage].packingUserQuery(generatedItineraryContent, destination, startDate, endDate, langName);
             
-            const apiKey = ""; // Leave empty
+            // ⚠️ IMPORTANT: You must add your Google Gemini API key here
+            const apiKey = "AIzaSyD2eYvAt57FfFfMZ8iJyWRLtD4ObRSEE4s"; // <--- PASTE YOUR API KEY HERE
+            
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            if (apiKey === "") {
+                 console.error("API Key is missing for packing list. Please add your Gemini API Key.");
+                 showModal('errorModal', 'modalTitle', "API Key is missing. Please ask the developer to configure the app.");
+                 packingBtn.innerHTML = `<span data-key="smartPackingButton">${translations[currentLanguage].smartPackingButton}</span>`;
+                 packingBtn.disabled = false;
+                 return;
+            }
+
 
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
@@ -581,12 +604,12 @@
                 <h1 class="text-4xl font-bold text-purple-400" data-key="title">TravelGenie</h1>
                 <p class="text-lg text-gray-300" data-key="subtitle">Your Personal AI Travel Planner</p>
             </div>
-           <div class="flex space-x-2">
-                <button data-lang="en" class="lang-btn bg-purple-600 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">EN</button>
-                <button data-lang="hi" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">HI</button>
-                <button data-lang="kn" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">KN</button>
-                <button data-lang="pa" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">PA</button>
-            </div>
+            <div class="flex space-x-2">
+                <button data-lang="en" class="lang-btn bg-purple-600 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">EN</button>
+                <button data-lang="hi" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">HI</button>
+                <button data-lang="kn" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">KN</button>
+                <button data-lang="pa" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">PA</button>
+            </div>
         </header>
 
         <!-- Itinerary Generation Form -->
@@ -595,11 +618,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="destination" class="block text-sm font-medium text-gray-300 mb-1" data-key="destination">Destination</label>
-                        <input type="text" id="destination" name="destination" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="destinationPlaceholder" placeholder="e.g., Paris, France">
+                        <input type="text" id="destination" name="destination" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="destinationPlaceholder" placeholder="e.g., Agra, India">
                     </div>
                     <div>
-                        <label for="budget" class="block text-sm font-medium text-gray-300 mb-1" data-key="budget">Budget (USD)</label>
-                        <input type="number" id="budget" name="budget" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="budgetPlaceholder" placeholder="e.g., 1500">
+                        <label for="budget" class="block text-sm font-medium text-gray-300 mb-1" data-key="budget">Budget (INR)</label>
+                        <input type="number" id="budget" name="budget" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="budgetPlaceholder" placeholder="e.g., 50000">
                     </div>
                     <div>
                         <label for="travelers" class="block text-sm font-medium text-gray-300 mb-1" data-key="travelers">Travelers</label>
