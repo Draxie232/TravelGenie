@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelGenie - AI Itinerary Planner</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Firebase (required for database) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let db, auth, userId, artifactsCollection;
+        let currentLanguage = 'en'; // Default language
+        let generatedItineraryContent = ""; // Store the last generated itinerary
+        let generatedItineraryDetails = {}; // Store the inputs for the itinerary
+
+        // --- LANGUAGE TRANSLATION DATA ---
+        const translations = {
+            'en': {
+                title: "TravelGenie",
+                subtitle: "Your Personal AI Travel Planner",
+                destination: "Destination",
+                destinationPlaceholder: "e.g., Paris, France",
+                budget: "Budget (USD)",
+                budgetPlaceholder: "e.g., 1500",
+                travelers: "Travelers",
+                travelersPlaceholder: "e.g., 2",
+                startDate: "Start Date",
+                endDate: "End Date",
+                generateButton: "Generate Itinerary",
+                generatingButton: "Generating...",
+                saveButton: "Save This Itinerary",
+                smartPackingButton: "✨ Smart Packing List",
+                generatingPackingList: "Generating...",
+                generatedItineraryTitle: "Your AI-Generated Itinerary",
+                savedItinerariesTitle: "Your Saved Itineraries",
+                deleteButton: "Delete",
+                modalTitle: "Error",
+                modalBody: "An error occurred. Please try again.",
+                modalClose: "Close",
+                packingModalTitle: "Smart Packing List",
+                saveSuccess: "Itinerary saved successfully!",
+                systemPrompt: "You are TravelGenie, a world-class AI travel planner. Your task is to create a personalized, dynamic, and inspiring travel itinerary. The user will provide a destination, budget, number of travelers, and dates. You MUST respond in the language specified by the user's prompt. Use Google Search to find real-time information, weather forecasts for the dates, and interesting local events. Structure the response clearly. Include suggestions for activities, dining, and appropriate clothing based on the weather. Be creative and helpful.",
+                userQuery: (dest, budget, travelers, start, end, lang) => `Please create a detailed travel itinerary for ${travelers} person(s) visiting ${dest} from ${start} to ${end}. Our total budget is approximately $${budget} USD. Please include suggestions for activities, food, and what to pack based on the weather. IMPORTANT: Respond ENTIRELY in ${lang}.`,
+                packingSystemPrompt: "You are an expert travel assistant. Based on the provided itinerary and context (destination, dates, weather), generate a concise and helpful packing list. Categorize items (e.g., Clothing, Essentials, Electronics) and be specific. Respond in the language of the user's request.",
+                packingUserQuery: (itinerary, dest, start, end, lang) => `Based on this itinerary for ${dest} from ${start} to ${end}, please generate a smart packing list. Respond ENTIRELY in ${lang}. \n\nITINERARY:\n${itinerary}`
+            }, // <-- This comma is after the 'hi' object
+            'kn': { // KANNADA
+                title: "TravelGenie",
+                subtitle: "ನಿಮ್ಮ ವೈಯಕ್ತಿಕ AI ಪ್ರಯಾಣ ಯೋಜಕ",
+                destination: "ಗಮ್ಯಸ್ಥಾನ",
+                destinationPlaceholder: "ಉದಾ, ಪ್ಯಾರಿಸ್, ಫ್ರಾನ್ಸ್",
+                budget: "ಬಜೆಟ್ (USD)",
+                budgetPlaceholder: "ಉದಾ, 1500",
+                travelers: "ಪ್ರಯಾಣಿಕರು",
+                travelersPlaceholder: "ಉದಾ, 2",
+                startDate: "ಪ್ರಾರಂಭ ದಿನಾಂಕ",
+                endDate: "ಅಂತಿಮ ದಿನಾಂಕ",
+                generateButton: "ಪ್ರಯಾಣ ವಿವರ ರಚಿಸಿ",
+                generatingButton: "ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+                saveButton: "ಈ ಪ್ರಯಾಣ ವಿವರವನ್ನು ಉಳಿಸಿ",
+                smartPackingButton: "✨ ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿ",
+                generatingPackingList: "ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+                generatedItineraryTitle: "ನಿಮ್ಮ AI-ರಚಿತ ಪ್ರಯಾಣ ವಿವರ",
+                savedItinerariesTitle: "ನಿಮ್ಮ ಉಳಿಸಿದ ಪ್ರಯಾಣ ವಿವರಗಳು",
+                deleteButton: "ಅಳಿಸಿ",
+                modalTitle: "ದೋಷ",
+                modalBody: "ಒಂದು ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+                modalClose: "ಮುಚ್ಚಿ",
+                packingModalTitle: "ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿ",
+                saveSuccess: "ಪ್ರಯಾಣ ವಿವರವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ!",
+                systemPrompt: "ನೀವು TravelGenie, ವಿಶ್ವ ದರ್ಜೆಯ AI ಪ್ರಯಾಣ ಯೋಜಕ. ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ, ಕ್ರಿಯಾತ್ಮಕ ಮತ್ತು ಸ್ಪೂರ್ತಿದಾಯಕ ಪ್ರಯಾಣ ವಿವರವನ್ನು ರಚಿಸುವುದು ನಿಮ್ಮ ಕಾರ್ಯ. ಬಳಕೆದಾರರು ಗಮ್ಯಸ್ಥಾನ, ಬಜೆಟ್, ಪ್ರಯಾಣಿಕರ ಸಂಖ್ಯೆ ಮತ್ತು ದಿನಾಂಕಗಳನ್ನು ಒದಗಿಸುತ್ತಾರೆ. ಬಳಕೆದಾರರ ವಿನಂತಿಯಲ್ಲಿ ನಿರ್ದಿಷ್ಟಪಡಿಸಿದ ಭಾಷೆಯಲ್ಲಿ ನೀವು ಪ್ರತಿಕ್ರಿಯಿಸಬೇಕು. ನೈಜ-ಸಮಯದ ಮಾಹಿತಿ, ದಿನಾಂಕಗಳ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ ಮತ್ತು ಆಸಕ್ತಿದಾಯಕ ಸ್ಥಳೀಯ ಘಟನೆಗಳನ್ನು ಹುಡುಕಲು Google ಹುಡುಕಾಟವನ್ನು ಬಳಸಿ. ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ರಚಿಸಿ. ಹವಾಮಾನದ ಆಧಾರದ ಮೇಲೆ ಚಟುವಟಿಕೆಗಳು, ಊಟ ಮತ್ತು ಸೂಕ್ತವಾದ ಬಟ್ಟೆಗಳಿಗೆ ಸಲಹೆಗಳನ್ನು ಸೇರಿಸಿ. ಸೃಜನಶೀಲ ಮತ್ತು ಸಹಾಯಕವಾಗಿರಿ.",
+                userQuery: (dest, budget, travelers, start, end, lang) => `ದಯವಿಟ್ಟು ${travelers} ವ್ಯಕ್ತಿ(ಗಳಿಗೆ) ${dest} ಗೆ ${start} ರಿಂದ ${end} ವರೆಗೆ ಭೇಟಿ ನೀಡಲು ವಿವರವಾದ ಪ್ರಯಾಣ ಯೋಜನೆಯನ್ನು ರಚಿಸಿ. ನಮ್ಮ ಒಟ್ಟು ಬಜೆಟ್ ಸುಮಾರು ₹${budget} USD. ದಯವಿಟ್ಟು ಚಟುವಟಿಕೆಗಳು, ಆಹಾರ ಮತ್ತು ಹವಾಮಾನದ ಆಧಾರದ ಮೇಲೆ ಏನು ಪ್ಯಾಕ್ ಮಾಡಬೇಕು ಎಂಬುದರ ಕುರಿತು ಸಲಹೆಗಳನ್ನು ಸೇರಿಸಿ. ಪ್ರಮುಖ: ಸಂಪೂರ್ಣವಾಗಿ ${lang} ನಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ.`,
+                packingSystemPrompt: "ನೀವು ಒಬ್ಬ ತಜ್ಞ ಪ್ರಯಾಣ ಸಹಾಯಕ. ಒದಗಿಸಿದ ಪ್ರಯಾಣ ವಿವರ ಮತ್ತು ಸಂದರ್ಭ (ಗಮ್ಯಸ್ಥಾನ, ದಿನಾಂಕಗಳು, ಹವಾಮಾನ) ಆಧರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಉಪಯುಕ್ತ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಿ. ವಸ್ತುಗಳನ್ನು ವರ್ಗೀಕರಿಸಿ (ಉದಾ, ಬಟ್ಟೆ, ಅಗತ್ಯ ವಸ್ತುಗಳು, ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್) ಮತ್ತು ನಿರ್ದಿಷ್ಟವಾಗಿರಿ. ಬಳಕೆದಾರರ ವಿನಂತಿಯ ಭಾಷೆಯಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ.",
+                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} ಗೆ ${start} ರಿಂದ ${end} ವರೆಗಿನ ಈ ಪ್ರಯಾಣ ವಿವರವನ್ನು ಆಧರಿಸಿ, ದಯವಿಟ್ಟು ಸ್ಮಾರ್ಟ್ ಪ್ಯಾಕಿಂಗ್ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಿ. ಸಂಪೂರ್ಣವಾಗಿ ${lang} ನಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ. \n\nಪ್ರಯಾಣ ವಿವರ:\n${itinerary}`
+            },
+            'pa': { // PUNJABI
+                title: "TravelGenie",
+                subtitle: "ਤੁਹਾਡਾ ਨਿੱਜੀ AI ਯਾਤਰਾ ਯੋਜਨਾਕਾਰ",
+                destination: "ਮੰਜ਼ਿਲ",
+                destinationPlaceholder: "ਜਿਵੇਂ, ਪੈਰਿਸ, ਫਰਾਂਸ",
+                budget: "ਬਜਟ (USD)",
+                budgetPlaceholder: "ਜਿਵੇਂ, 1500",
+                travelers: "ਯਾਤਰੀ",
+                travelersPlaceholder: "ਜਿਵੇਂ, 2",
+                startDate: "ਸ਼ੁਰੂਆਤੀ ਮਿਤੀ",
+                endDate: "ਅੰਤਿਮ ਮਿਤੀ",
+                generateButton: "ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਓ",
+                generatingButton: "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
+                saveButton: "ਇਸ ਯਾਤਰਾ ਯੋਜਨਾ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ",
+                smartPackingButton: "✨ ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ",
+                generatingPackingList: "ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...",
+              _generatedItineraryTitle: "ਤੁਹਾਡੀ AI-ਦੁਆਰਾ ਬਣਾਈ ਯਾਤਰਾ ਯੋਜਨਾ",
+                savedItinerariesTitle: "ਤੁਹਾਡੀਆਂ ਸੁਰੱਖਿਅਤ ਕੀਤੀਆਂ ਯਾਤਰਾ ਯੋਜਨਾਵਾਂ",
+                deleteButton: "ਮਿਟਾਓ",
+                modalTitle: "ਗਲਤੀ",
+                modalBody: "ਇੱਕ ਗਲਤੀ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+                modalClose: "ਬੰਦ ਕਰੋ",
+                packingModalTitle: "ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ",
+                saveSuccess: "ਯਾਤਰਾ ਯੋਜਨਾ ਸਫਲਤਾਪੂਰਵਕ ਸੁਰੱਖਿਅਤ ਕੀਤੀ ਗਈ!",
+                systemPrompt: "ਤੁਸੀਂ TravelGenie ਹੋ, ਇੱਕ ਵਿਸ਼ਵ-ਪੱਧਰੀ AI ਯਾਤਰਾ ਯੋਜਨਾਕਾਰ। ਤੁਹਾਡਾ ਕੰਮ ਇੱਕ ਵਿਅਕਤੀਗਤ, ਗਤੀਸ਼ੀਲ, ਅਤੇ ਪ੍ਰੇਰਣਾਦਾਇਕ ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਉਣਾ ਹੈ। ਉਪਭੋਗਤਾ ਇੱਕ ਮੰਜ਼ਿਲ, ਬਜਟ, ਯਾਤਰੀਆਂ ਦੀ ਗਿਣਤੀ, ਅਤੇ ਤਾਰੀਖਾਂ ਪ੍ਰਦਾਨ ਕਰੇਗਾ। ਤੁਹਾਨੂੰ ਉਪਭੋਗਤਾ ਦੀ ਬੇਨਤੀ ਵਿੱਚ ਦੱਸੀ ਭਾਸ਼ਾ ਵਿੱਚ ਜਵਾਬ ਦੇਣਾ ਚਾਹੀਦਾ ਹੈ। ਰੀਅਲ-ਟਾਈਮ ਜਾਣਕਾਰੀ, ਤਾਰੀਖਾਂ ਲਈ ਮੌਸਮ ਦੀ ਭਵਿੱਖਬਾਣੀ, ਅਤੇ ਦਿਲਚਸਪ ਸਥਾਨਕ ਸਮਾਗਮਾਂ ਨੂੰ ਲੱਭਣ ਲਈ ਗੂਗਲ ਖੋਜ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਜਵਾਬ ਨੂੰ ਸਪਸ਼ਟ ਰੂਪ ਵਿੱਚ ਤਿਆਰ ਕਰੋ। ਮੌਸਮ ਦੇ ਅਧਾਰ 'ਤੇ ਗਤੀਵਿਧੀਆਂ, ਭੋਜਨ, ਅਤੇ ਢੁਕਵੇਂ ਕੱਪੜਿਆਂ ਲਈ ਸੁਝਾਅ ਸ਼ਾਮਲ ਕਰੋ। ਰਚਨਾਤਮਕ ਅਤੇ ਮਦਦਗਾਰ ਬਣੋ।",
+                userQuery: (dest, budget, travelers, start, end, lang) => `ਕਿਰਪਾ ਕਰਕੇ ${travelers} ਵਿਅਕਤੀ(ਆਂ) ਲਈ ${dest} ਦੀ ਯਾਤਰਾ ਲਈ ${start} ਤੋਂ ${end} ਤੱਕ ਇੱਕ ਵਿਸਤ੍ਰਿਤ ਯਾਤਰਾ ਯੋਜਨਾ ਬਣਾਓ। ਸਾਡਾ ਕੁੱਲ ਬਜਟ ਲਗਭਗ ₹${budget} USD ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਮੌਸਮ ਦੇ ਅਧਾਰ 'ਤੇ ਗਤੀਵਿਧੀਆਂ, ਭੋਜਨ, ਅਤੇ ਕੀ ਪੈਕ ਕਰਨਾ ਹੈ, ਇਸ ਬਾਰੇ ਸੁਝਾਅ ਸ਼ਾਮਲ ਕਰੋ। ਮਹੱਤਵਪੂਰਨ: ਪੂਰੀ ਤਰ੍ਹਾਂ ${lang} ਵਿੱਚ ਜਵਾਬ ਦਿਓ।`,
+                packingSystemPrompt: "ਤੁਸੀਂ ਇੱਕ ਮਾਹਰ ਯਾਤਰਾ ਸਹਾਇਕ ਹੋ। ਪ੍ਰਦਾਨ ਕੀਤੀ ਯਾਤਰਾ ਯੋਜਨਾ ਅਤੇ ਸੰਦਰਭ (ਮੰਜ਼ਿਲ, ਤਾਰੀਖਾਂ, ਮੌਸਮ) ਦੇ ਅਧਾਰ 'ਤੇ, ਇੱਕ ਸੰਖੇਪ ਅਤੇ ਮਦਦਗਾਰ ਪੈਕਿੰਗ ਸੂਚੀ ਤਿਆਰ ਕਰੋ। ਆਈਟਮਾਂ ਨੂੰ ਸ਼੍ਰੇਣੀਬੱਧ ਕਰੋ (ਜਿਵੇਂ, ਕੱਪੜੇ, ਜ਼ਰੂਰੀ ਚੀਜ਼ਾਂ, ਇਲੈਕਟ੍ਰਾਨਿਕਸ) ਅਤੇ ਖਾਸ ਬਣੋ। ਉਪਭੋਗਤਾ ਦੀ ਬੇਨਤੀ ਦੀ ਭਾਸ਼ਾ ਵਿੱਚ ਜਵਾਬ ਦਿਓ।",
+                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} ਲਈ ${start} ਤੋਂ ${end} ਤੱਕ ਦੀ ਇਸ ਯਾਤਰਾ ਯੋਜਨਾ ਦੇ ਅਧਾਰ 'ਤੇ, ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਸਮਾਰਟ ਪੈਕਿੰਗ ਸੂਚੀ ਤਿਆਰ ਕਰੋ। ਪੂਰੀ ਤਰ੍ਹਾਂ ${lang} ਵਿੱਚ ਜਵਾਬ ਦਿਓ। \n\nਯਾਤਰਾ ਯੋਜਨਾ:\n${itinerary}`
+            },  
+            'hi': {
+                title: "TravelGenie",
+                subtitle: "आपका व्यक्तिगत AI यात्रा योजनाकार",
+                destination: "गंतव्य",
+                destinationPlaceholder: "जैसे, पेरिस, फ्रांस",
+                budget: "बजट (Rs.)",
+                budgetPlaceholder: "जैसे, 1500",
+                travelers: "यात्री",
+                travelersPlaceholder: "जैसे, 2",
+                startDate: "आरंभ तिथि",
+                endDate: "समाप्ति तिथि",
+                generateButton: "यात्रा कार्यक्रम बनाएं",
+                generatingButton: "बनाया जा रहा है...",
+                saveButton: "इस यात्रा कार्यक्रम को सहेजें",
+                smartPackingButton: "✨ स्मार्ट पैकिंग सूची",
+                generatingPackingList: "बनाया जा रहा है...",
+                generatedItineraryTitle: "आपका AI-जनित यात्रा कार्यक्रम",
+                savedItinerariesTitle: "आपके सहेजे गए यात्रा कार्यक्रम",
+                deleteButton: "हटाएं",
+                modalTitle: "त्रुटि",
+                modalBody: "एक त्रुटि हुई। कृपया पुन: प्रयास करें।",
+                modalClose: "बंद करें",
+                packingModalTitle: "स्मार्ट पैकिंग सूची",
+                saveSuccess: "यात्रा कार्यक्रम सफलतापूर्वक सहेजा गया!",
+                systemPrompt: "आप TravelGenie हैं, एक विश्व स्तरीय AI यात्रा योजनाकार। आपका काम एक व्यक्तिगत, गतिशील और प्रेरणादायक यात्रा कार्यक्रम बनाना है। उपयोगकर्ता एक गंतव्य, बजट, यात्रियों की संख्या और तारीखें प्रदान करेगा। आपको उपयोगकर्ता के प्रॉम्प्ट में निर्दिष्ट भाषा में जवाब देना होगा। वास्तविक समय की जानकारी, तारीखों के लिए मौसम के पूर्वानुमान और दिलचस्प स्थानीय घटनाओं को खोजने के लिए Google खोज का उपयोग करें। प्रतिक्रिया को स्पष्ट रूप से संरचित करें। मौसम के आधार पर गतिविधियों, भोजन और उपयुक्त कपड़ों के लिए सुझाव शामिल करें। रचनात्मक और सहायक बनें।",
+                userQuery: (dest, budget, travelers, start, end, lang) => `कृपया ${travelers} व्यक्ति(यों) के लिए ${dest} की यात्रा के लिए ${start} से ${end} तक एक विस्तृत यात्रा कार्यक्रम बनाएं। हमारा कुल बजट लगभग ₹${budget} USD है। कृपया मौसम के आधार पर गतिविधियों, भोजन और क्या पैक करना है, इसके लिए सुझाव शामिल करें। महत्वपूर्ण: पूरी तरह से ${lang} में जवाब दें।`,
+                packingSystemPrompt: "आप एक विशेषज्ञ यात्रा सहायक हैं। प्रदान किए गए यात्रा कार्यक्रम और संदर्भ (गंतव्य, तिथियां, मौसम) के आधार पर, एक संक्षिप्त और उपयोगी पैकिंग सूची तैयार करें। वस्तुओं को वर्गीकृत करें (जैसे, कपड़े, आवश्यक वस्तुएं, इलेक्ट्रॉनिक्स) और विशिष्ट रहें। उपयोगकर्ता के अनुरोध की भाषा में जवाब दें।",
+                packingUserQuery: (itinerary, dest, start, end, lang) => `${dest} के लिए ${start} से ${end} तक के इस यात्रा कार्यक्रम के आधार पर, कृपया एक स्मार्ट पैकिंग सूची तैयार करें। पूरी तरह से ${lang} में जवाब दें। \n\nयात्रा कार्यक्रम:\n${itinerary}`
+            }
+        };
+
+        // --- UTILITY FUNCTIONS ---
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('[data-key]').forEach(elem => {
+                const key = elem.getAttribute('data-key');
+                if (translations[lang] && translations[lang][key]) {
+                    if (elem.tagName === 'INPUT' || elem.tagName === 'TEXTAREA') {
+                        elem.placeholder = translations[lang][key];
+                    } else {
+                        elem.textContent = translations[lang][key];
+                    }
+                }
+            });
+            // Update active state for language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('bg-purple-600', btn.getAttribute('data-lang') === lang);
+                btn.classList.toggle('bg-purple-400', btn.getAttribute('data-lang') !== lang);
+            });
+        }
+
+        function showLoading(isLoading) {
+            const loader = document.getElementById('loader');
+            const generateBtn = document.getElementById('generateButton');
+            const generatingBtn = document.getElementById('generatingButton');
+            if (isLoading) {
+                loader.classList.remove('hidden');
+                generateBtn.classList.add('hidden');
+                generatingBtn.classList.remove('hidden');
+            } else {
+                loader.classList.add('hidden');
+                generateBtn.classList.remove('hidden');
+                generatingBtn.classList.add('hidden');
+            }
+        }
+
+        function showModal(modalId, titleKey, bodyText) {
+            const modal = document.getElementById(modalId);
+            const titleEl = modal.querySelector('.modal-title');
+            const bodyEl = modal.querySelector('.modal-body');
+            
+            if (titleEl && translations[currentLanguage][titleKey]) {
+                titleEl.textContent = translations[currentLanguage][titleKey];
+            } else if (titleEl) {
+                titleEl.textContent = titleKey; // Fallback for dynamic text
+            }
+            
+            if (bodyEl) {
+                bodyEl.innerHTML = bodyText; // Use innerHTML to render formatted text
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 500);
+            }, 3000);
+        }
+
+        // --- FIREBASE & AUTHENTICATION ---
+        async function initFirebase() {
+            try {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+                if (!firebaseConfig.apiKey) {
+                    console.error("Firebase config is missing.");
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug');
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("User authenticated:", userId);
+                        artifactsCollection = collection(db, 'artifacts', appId, 'users', userId, 'itineraries');
+                        loadSavedItineraries(); // Load data once auth is ready
+                    } else {
+                        // No user, sign in
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (authError) {
+                            console.error("Firebase auth error:", authError);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Error initializing Firebase:", e);
+                showModal('errorModal', 'modalTitle', translations[currentLanguage].modalBody);
+            }
+        }
+
+        // --- GEMINI API CALL (Simulates Python Model) ---
+        async function handleGenerateItinerary() {
+            const destination = document.getElementById('destination').value;
+            const budget = document.getElementById('budget').value;
+            const travelers = document.getElementById('travelers').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!destination || !budget || !travelers || !startDate || !endDate) {
+                showModal('errorModal', 'modalTitle', 'Please fill in all fields.'); // Simple validation
+                return;
+            }
+            
+            showLoading(true);
+            document.getElementById('itineraryResult').classList.add('hidden');
+            document.getElementById('saveButton').classList.add('hidden');
+            document.getElementById('smartPackingButton').classList.add('hidden');
+
+            const langNameMap = {
+                'en': 'English',
+                'hi': 'Hindi',
+                'kn': 'Kannada',
+                'pa': 'Punjabi'
+            };
+            const langName = langNameMap[currentLanguage] || 'English'; // Default to English
+            const systemPrompt = translations[currentLanguage].systemPrompt;
+            const userQuery = translations[currentLanguage].userQuery(destination, budget, travelers, startDate, endDate, langName);
+            const apiKey = "AIzaSyD2eYvAt57FfFfMZ8iJyWRLtD4ObRSEE4s"; // Leave empty, will be handled by environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }], // Enable real-time search
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            let retries = 3;
+            let delay = 1000;
+            let response;
+
+            while (retries > 0) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        const candidate = result.candidates?.[0];
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            generatedItineraryContent = candidate.content.parts[0].text; // Store raw text
+                            generatedItineraryDetails = { destination, budget, travelers, startDate, endDate, language: currentLanguage };
+                            
+                            // Format text for HTML
+                            let formattedText = generatedItineraryContent
+                                .replace(/\n/g, '<br>')
+                                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                                .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italics
+
+                            document.getElementById('itineraryContent').innerHTML = formattedText;
+                            document.getElementById('itineraryResult').classList.remove('hidden');
+                            document.getElementById('saveButton').classList.remove('hidden');
+                            document.getElementById('smartPackingButton').classList.remove('hidden'); // Show packing button
+                            showLoading(false);
+                            return; // Success
+                        }
+                    }
+                } catch (error) {
+                    console.error("API Fetch Error:", error);
+                }
+
+                retries--;
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; // Exponential backoff
+                }
+            }
+            
+            showLoading(false);
+            showModal('errorModal', 'modalTitle', translations[currentLanguage].modalBody);
+            console.error("Failed to generate itinerary after multiple attempts.");
+        }
+
+        // --- NEW GEMINI API CALL (Packing List) ---
+        async function handleGeneratePackingList() {
+            if (!generatedItineraryContent) {
+                showModal('errorModal', 'modalTitle', 'Please generate an itinerary first.');
+                return;
+            }
+
+            const packingBtn = document.getElementById('smartPackingButton');
+            const originalBtnText = packingBtn.innerHTML;
+            packingBtn.innerHTML = `
+                <span class="flex items-center justify-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span data-key="generatingPackingList">${translations[currentLanguage].generatingPackingList}</span>
+                </span>`;
+            packingBtn.disabled = true;
+
+            const { destination, startDate, endDate } = generatedItineraryDetails;
+            const langNameMap = {
+                'en': 'English',
+                'hi': 'Hindi',
+                'kn': 'Kannada',
+                'pa': 'Punjabi'
+            };
+            const langName = langNameMap[currentLanguage] || 'English'; // Default to English
+            
+            const systemPrompt = translations[currentLanguage].packingSystemPrompt;
+            const userQuery = translations[currentLanguage].packingUserQuery(generatedItineraryContent, destination, startDate, endDate, langName);
+            
+            const apiKey = ""; // Leave empty
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                // No Google Search needed, we provide all context
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        const packingListText = candidate.content.parts[0].text;
+                        let formattedText = packingListText
+                            .replace(/\n/g, '<br>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                        
+                        showModal('packingModal', 'packingModalTitle', formattedText);
+                    } else {
+                        throw new Error("No content in API response.");
+                    }
+                } else {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+            } catch (error) {
+                console.error("Packing List API Error:", error);
+                showModal('errorModal', 'modalTitle', translations[currentLanguage].modalBody);
+            } finally {
+                // Restore button
+                packingBtn.innerHTML = `<span data-key="smartPackingButton">${translations[currentLanguage].smartPackingButton}</span>`;
+                packingBtn.disabled = false;
+            }
+        }
+
+
+        // --- FIRESTORE DATABASE LOGIC (Simulates MongoDB) ---
+
+        // Save the generated itinerary to Firestore
+        async function handleSaveItinerary() {
+            if (!artifactsCollection || !generatedItineraryContent) {
+                console.error("Firestore not ready or no itinerary to save.");
+                return;
+            }
+
+            try {
+                await addDoc(artifactsCollection, {
+                    ...generatedItineraryDetails,
+                    itineraryText: generatedItineraryContent,
+                    createdAt: new Date().toISOString()
+                });
+                showToast(translations[currentLanguage].saveSuccess);
+                // Clear content after saving to prevent duplicate saves
+                generatedItineraryContent = "";
+                generatedItineraryDetails = {};
+                document.getElementById('saveButton').classList.add('hidden');
+                document.getElementById('smartPackingButton').classList.add('hidden');
+
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showModal('errorModal', 'modalTitle', translations[currentLanguage].modalBody);
+            }
+        }
+
+        // Load and display saved itineraries from Firestore
+        function loadSavedItineraries() {
+            if (!artifactsCollection) {
+                console.error("Firestore collection not initialized.");
+                return;
+            }
+
+            const q = query(artifactsCollection); 
+
+            onSnapshot(q, (snapshot) => {
+                const savedList = document.getElementById('savedItinerariesList');
+                savedList.innerHTML = ''; 
+                
+                if (snapshot.empty) {
+                    savedList.innerHTML = `<p class="text-gray-400 italic" data-key="noSavedItineraries">No saved itineraries yet.</p>`;
+                    return;
+                }
+
+                let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                docs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                docs.forEach((docData) => {
+                    const data = docData;
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-800 p-4 rounded-lg shadow-lg relative';
+                    
+                    // Format text for display in details
+                    let formattedDetailsText = data.itineraryText
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+                    card.innerHTML = `
+                        <h4 class="text-xl font-bold text-purple-300">${data.destination}</h4>
+                        <p class="text-gray-300 text-sm">${data.startDate} to ${data.endDate}</p>
+                        <p class="text-gray-400 mt-2">${data.travelers} traveler(s), Budget: ₹${data.budget}</p>
+                        <button data-id="${docData.id}" class="delete-btn absolute top-3 right-3 text-red-400 hover:text-red-300 px-2 py-1" aria-label="Delete">
+                            <span class="text-2xl font-bold">&times;</span>
+                        </button>
+                        <details class="mt-4">
+                            <summary class="cursor-pointer text-purple-400">View Itinerary</summary>
+                            <div class="mt-2 text-gray-300 prose prose-invert max-w-none">${formattedDetailsText}</div>
+                        </details>
+                    `;
+                    savedList.appendChild(card);
+                });
+            }, (error) => {
+                console.error("Error with onSnapshot:", error);
+                showModal('errorModal', 'modalTitle', translations[currentLanguage].modalBody);
+            });
+        }
+
+        // Delete an itinerary from Firestore
+        async function handleDeleteItinerary(id) {
+            if (!artifactsCollection) {
+                console.error("Firestore not ready.");
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, artifactsCollection.path, id));
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                showModal('errorModal', 'modalTitle', translations[currentLanguage].modalBody);
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            switchLanguage(currentLanguage); // Set default language
+
+            // Language switchers
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchLanguage(btn.getAttribute('data-lang')));
+            });
+
+            // Main form submission
+            document.getElementById('generateButton').addEventListener('click', handleGenerateItinerary);
+
+            // Save button
+            document.getElementById('saveButton').addEventListener('click', handleSaveItinerary);
+            
+            // New Packing List button
+            document.getElementById('smartPackingButton').addEventListener('click', handleGeneratePackingList);
+
+            // Close modal buttons
+            document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.modal-container').classList.add('hidden');
+                });
+            });
+
+            // Event delegation for delete buttons
+            document.getElementById('savedItinerariesList').addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-btn');
+                if (deleteButton) {
+                    const id = deleteButton.getAttribute('data-id');
+                    if (id) {
+                        handleDeleteItinerary(id);
+                    }
+                }
+            });
+        });
+
+    </script>
+</head>
+<body class="bg-gray-900 text-white font-sans leading-normal tracking-normal">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden opacity-0 fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 z-50">
+        Itinerary saved!
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 modal-container">
+        <div class="bg-white text-gray-900 p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 class="modal-title text-xl font-bold mb-4" data-key="modalTitle">Error</h3>
+            <p class="modal-body mb-6" data-key="modalBody">An error occurred.</p>
+            <button class="close-modal-btn w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition" data-key="modalClose">
+                Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- Packing List Modal -->
+    <div id="packingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 modal-container">
+        <div class="bg-white text-gray-900 p-6 rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
+            <h3 class="modal-title text-2xl font-bold mb-4 text-purple-700" data-key="packingModalTitle">Smart Packing List</h3>
+            <div class="modal-body overflow-y-auto prose max-w-none">
+                <!-- Packing list content will be injected here -->
+            </div>
+            <button class="close-modal-btn w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition mt-6" data-key="modalClose">
+                Close
+            </button>
+        </div>
+    </div>
+
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-4xl font-bold text-purple-400" data-key="title">TravelGenie</h1>
+                <p class="text-lg text-gray-300" data-key="subtitle">Your Personal AI Travel Planner</p>
+            </div>
+           <div class="flex space-x-2">
+                <button data-lang="en" class="lang-btn bg-purple-600 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">EN</button>
+                <button data-lang="hi" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">HI</button>
+                <button data-lang="kn" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">KN</button>
+                <button data-lang="pa" class="lang-btn bg-purple-400 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-500 transition">PA</button>
+            </div>
+        </header>
+
+        <!-- Itinerary Generation Form -->
+        <section class="bg-gray-800 p-6 rounded-lg shadow-xl mb-8">
+            <form id="itineraryForm" onsubmit="event.preventDefault();">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="destination" class="block text-sm font-medium text-gray-300 mb-1" data-key="destination">Destination</label>
+                        <input type="text" id="destination" name="destination" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="destinationPlaceholder" placeholder="e.g., Paris, France">
+                    </div>
+                    <div>
+                        <label for="budget" class="block text-sm font-medium text-gray-300 mb-1" data-key="budget">Budget (USD)</label>
+                        <input type="number" id="budget" name="budget" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="budgetPlaceholder" placeholder="e.g., 1500">
+                    </div>
+                    <div>
+                        <label for="travelers" class="block text-sm font-medium text-gray-300 mb-1" data-key="travelers">Travelers</label>
+                        <input type="number" id="travelers" name="travelers" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500" data-key="travelersPlaceholder" placeholder="e.g., 2" min="1">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="startDate" class="block text-sm font-medium text-gray-300 mb-1" data-key="startDate">Start Date</label>
+                            <input type="date" id="startDate" name="startDate" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label for="endDate" class="block text-sm font-medium text-gray-300 mb-1" data-key="endDate">End Date</label>
+                            <input type="date" id="endDate" name="endDate" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <button id="generateButton" type="button" class="w-full md:w-auto bg-purple-600 text-white font-bold py-3 px-8 rounded-full hover:bg-purple-700 transition shadow-lg" data-key="generateButton">
+                        Generate Itinerary
+                    </button>
+                    <button id="generatingButton" type="button" class="hidden w-full md:w-auto bg-purple-400 text-white font-bold py-3 px-8 rounded-full transition shadow-lg" disabled>
+                        <span class="flex items-center justify-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span data-key="generatingButton">Generating...</span>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Loading Spinner (overlay for result) -->
+        <div id="loader" class="hidden text-center p-10">
+            <svg class="animate-spin h-10 w-10 text-purple-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- Generated Itinerary Result -->
+        <section id="itineraryResult" class="hidden bg-gray-800 p-6 rounded-lg shadow-xl mb-8">
+            <h2 class="text-2xl font-bold text-purple-300 mb-4" data-key="generatedItineraryTitle">Your AI-Generated Itinerary</h2>
+            <div id="itineraryContent" class="prose prose-invert max-w-none text-gray-300">
+                <!-- AI content will be injected here -->
+            </div>
+            <div class="flex flex-col md:flex-row justify-center gap-4 mt-6">
+                <button id="saveButton" type="button" class="w-full md:w-auto bg-green-600 text-white font-bold py-2 px-6 rounded-full hover:bg-green-700 transition shadow-lg hidden" data-key="saveButton">
+                    Save This Itinerary
+                </button>
+                <button id="smartPackingButton" type="button" class="w-full md:w-auto bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition shadow-lg hidden" data-key="smartPackingButton">
+                    ✨ Smart Packing List
+                </button>
+            </div>
+        </section>
+
+        <!-- Saved Itineraries Section -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-300 mb-4" data-key="savedItinerariesTitle">Your Saved Itineraries</h2>
+            <div id="savedItinerariesList" class="space-y-4">
+                <!-- Saved itineraries will be injected here -->
+                <p class="text-gray-400 italic">Loading saved itineraries...</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>
