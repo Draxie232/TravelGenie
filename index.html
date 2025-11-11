@@ -6,6 +6,8 @@
     <title>TravelGenie - AI Itinerary Planner</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
+
     <!-- Load Firebase (required for database) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -272,7 +274,8 @@
             const userQuery = translations[currentLanguage].userQuery(destination, budget, travelers, startDate, endDate, langName);
             
             // ⚠️ IMPORTANT: You must add your Google Gemini API key here
-            const apiKey = "AIzaSyD959uihIcHirR7KPw8K6Zhii00AXhdHtc"; // <--- PASTE YOUR API KEY HERE
+            const apiKey = window.GEMINI_API_KEY;
+ // <--- PASTE YOUR API KEY HERE
             
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
@@ -373,7 +376,8 @@
             const userQuery = translations[currentLanguage].packingUserQuery(generatedItineraryContent, destination, startDate, endDate, langName);
             
             // ⚠️ IMPORTANT: You must add your Google Gemini API key here
-            const apiKey = "AIzaSyD959uihIcHirR7KPw8K6Zhii00AXhdHtc"; // <--- PASTE YOUR API KEY HERE
+            const apiKey = window.GEMINI_API_KEY;
+ // <--- PASTE YOUR API KEY HERE
             
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
