@@ -272,11 +272,11 @@
             const userQuery = translations[currentLanguage].userQuery(destination, budget, travelers, startDate, endDate, langName);
             
             // ⚠️ IMPORTANT: You must add your Google Gemini API key here
-            const apiKey = ""; // <--- PASTE YOUR API KEY HERE
+            const apiKey = "AIzaSyD2eYvAt57FfFfMZ8iJyWRLtD4ObRSEE4"; // <--- PASTE YOUR API KEY HERE
             
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-            if (apiKey === "") {
+            if (apiKey === "AIzaSyD2eYvAt57FfFfMZ8iJyWRLtD4ObRSEE4") {
                  console.error("API Key is missing. Please add your Gemini API Key.");
                  showModal('errorModal', 'modalTitle', "API Key is missing. Please ask the developer to configure the app.");
                  showLoading(false);
